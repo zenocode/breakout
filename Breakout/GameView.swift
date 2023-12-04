@@ -9,33 +9,53 @@ import SwiftUI
 import SpriteKit
 
 struct GameView: View {
-    
-    @StateObject private var game = GameScene()
-    @StateObject private var lv2 = Level002()
-    
+    //    @StateObject private var game = GameScene(gameState: gameState)
+    //    @StateObject private var lv2 = Level002()
+    @State var gameState: GameState
+    @StateObject var game: GameScene
+
     var body: some View {
-        ZStack(alignment: .top) {
-            HStack {
-                SpriteView(scene: game)
-                //SpriteView(scene: game, debugOptions: [.showsPhysics])
+        GeometryReader { geo in
+            ZStack(alignment: .top) {
+                HStack {
+                    SpriteView(scene: game)
+                    //SpriteView(scene: game, debugOptions: [.showsPhysics])
                     .ignoresSafeArea()
+                }
+                    .navigationBarHidden(true)
+                    .navigationBarBackButtonHidden(true)
+                    .ignoresSafeArea()
+                    .statusBar(hidden: true)
+                    .onChange(of: gameState.isGameWon) { oldValue, newValue in
+                    print("NAVIGATION")
+                    gameState.navigationPath = NavigationPath()
+                }
+                if gameState.isGameOver {
+                    VStack {
+                        Spacer()
+                        NavigationLink(destination: ContentView(), label: {
+                                Text("Main Menu")
+                            })
+                        Spacer()
+                    }
+                }
+                if gameState.isGameWon {
+                    VStack {
+                        Spacer()
+                        NavigationLink(destination: ContentView(), label: {
+                                Text("Main Menu")
+                            })
+                        Spacer()
+                    }
+                }
+                VStack(alignment: .trailing) {
+                    Text("Score: \(game.score)")
+                        .padding(.top, 60)
+                        .foregroundColor(.white)
+                }
             }
-            .navigationBarHidden(true)
-            .navigationBarBackButtonHidden(true)
-            .ignoresSafeArea()
-            .statusBar(hidden: true)
-            
-            if game.isGameOver {
-                NavigationLink(destination: ContentView(), label: {
-                    Text("Main Menu")
-                })
-            }
-            VStack(alignment: .trailing) {
-                            Text("Score: \(game.score)")
-                            .frame(minWidth: 0, maxWidth: .infinity, minHeight: 100)
-                            .foregroundColor(.white)
-            }
+                .frame(width: geo.size.width, alignment: .center)
+                .ignoresSafeArea()
         }
-        .ignoresSafeArea()
     }
 }

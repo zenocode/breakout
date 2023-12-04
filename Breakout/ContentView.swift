@@ -9,37 +9,35 @@ import SwiftUI
 import SpriteKit
 
 struct ContentView: View {
-    
-    init(){
-            UINavigationBar.setAnimationsEnabled(false)
-        }
-    
+    @State var gameState: GameState = GameState()
+    init() {
+        UINavigationBar.setAnimationsEnabled(false)
+    }
+
     var body: some View {
-        NavigationView {
+        NavigationStack(path: $gameState.navigationPath) {
             ZStack {
                 Image("menu_bg")
-                            .resizable()
-                            .scaledToFill()
-                            .edgesIgnoringSafeArea(.all)
+                    .resizable()
+                    .scaledToFill()
+                    .edgesIgnoringSafeArea(.all)
                 VStack {
                     Spacer()
-                    NavigationLink(destination: GameView(), label: {
-                        Text("Start Game")
-                            .foregroundColor(Color.white)
-                    })
+                    NavigationLink(destination: GameView(gameState: gameState, game: GameScene(gameState: gameState)), label: {
+                            Text("Start Game")
+                                .foregroundColor(Color.white)
+                        })
                     Spacer()
-                }//VSTack
-                
-            }// ZStack
-            .frame(width: 440, height: 950, alignment: .center)
+                }
+            }
+                .frame(width: 440, height: 950, alignment: .center)
+                .navigationBarHidden(true)
+                .navigationBarBackButtonHidden(true)
+        }
+            .navigationViewStyle(StackNavigationViewStyle())
+            .ignoresSafeArea()
             .navigationBarHidden(true)
             .navigationBarBackButtonHidden(true)
-            
-        }//NavigationView
-        .navigationViewStyle(StackNavigationViewStyle())
-        .ignoresSafeArea()
-        .navigationBarHidden(true)
-        .navigationBarBackButtonHidden(true)
-        .statusBar(hidden: true)
+            .statusBar(hidden: true)
     }
 }

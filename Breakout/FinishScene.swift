@@ -7,37 +7,65 @@
 
 import Foundation
 import SpriteKit
+import SwiftUI
 
-class Finish001: SKScene {
-    
+class LvlFinishScene: SKScene {
+    let lvlFinished: Int
+    let gameState: GameState
+
+    init(lvlFinished: Int, gameState: GameState) {
+        self.lvlFinished = lvlFinished
+        self.gameState = gameState
+        super.init(size: UIScreen.main.bounds.size)
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     override func didMove(to view: SKView) {
         backgroundColor = .gray
-        
+
         let label = SKLabelNode(fontNamed: "Helvetica")
-        label.text = "Level 1 Cleared"
+        label.text = "Level \(lvlFinished + 1) Cleared"
         label.fontColor = .white
         label.fontSize = 45
         label.position = CGPoint(x: size.width / 2, y: size.height / 2)
         addChild(label)
     }
-    
+
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        let nextLevel = Level002(size: self.size)
-        
-        self.view?.presentScene(nextLevel)
+        let game = GameScene(gameState: gameState)
+        self.view?.presentScene(game)
     }
 }
 
-class Finish002: SKScene {
-    
+class GameFinishScene: SKScene {
+    let gameState: GameState
+
+    init(gameState: GameState) {
+        self.gameState = gameState
+        super.init(size: UIScreen.main.bounds.size)
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     override func didMove(to view: SKView) {
         backgroundColor = .gray
-        
+
         let label = SKLabelNode(fontNamed: "Helvetica")
-        label.text = "Level 2 Cleared"
+        label.text = "You Won!"
         label.fontColor = .white
         label.fontSize = 45
         label.position = CGPoint(x: size.width / 2, y: size.height / 2)
         addChild(label)
+    }
+
+    override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        // Assuming you have a reference to the current window
+//        gameState.navigationPath = NavigationPath()
+//        print("HERE")
     }
 }

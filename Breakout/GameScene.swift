@@ -10,36 +10,42 @@ import SpriteKit
 import GameKit
 
 class GameScene: SKScene, ObservableObject, SKPhysicsContactDelegate {
-    
+    let gameState: GameState
     let paddle = SKSpriteNode(imageNamed: "paddle")
     let ball = SKSpriteNode(imageNamed: "ball")
-    
     var brickCounter = 0
-    
     @Published var score = 0
-    
-    @Published var isGameOver = false
-    
-    enum bitmasks: UInt32 {
-        case frame = 0b1        // 1
-        case paddle = 0b10      // 2
-        case brick = 0b100      // 4
-        case ball = 0b1000      // 8
+
+    init(gameState: GameState, brickCounter: Int = 0, score: Int = 0) {
+        self.gameState = gameState
+        self.brickCounter = brickCounter
+        self.score = score
+        super.init(size: UIScreen.main.bounds.size)
     }
-    
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
+    enum bitmasks: UInt32 {
+        case frame = 0b1 // 1
+        case paddle = 0b10 // 2
+        case brick = 0b100 // 4
+        case ball = 0b1000 // 8
+    }
+
     override func didMove(to view: SKView) {
-        
         backgroundColor = .darkGray
         view.showsPhysics = true
-        
+
         scene?.size = view.bounds.size
         scene?.scaleMode = .aspectFill
-        
+
         physicsWorld.gravity = .zero
         physicsWorld.contactDelegate = self
-        
+
         self.isPaused = true
-        
+
         // Paddle
         paddle.position = CGPoint(x: size.width / 2, y: 75)
         paddle.zPosition = 2
@@ -52,7 +58,7 @@ class GameScene: SKScene, ObservableObject, SKPhysicsContactDelegate {
         paddle.physicsBody?.contactTestBitMask = bitmasks.ball.rawValue
         paddle.physicsBody?.collisionBitMask = bitmasks.ball.rawValue
         addChild(paddle)
-        
+
         // Ball
         ball.position.x = paddle.position.x
         ball.position.y = paddle.position.y + ball.size.height
@@ -67,9 +73,9 @@ class GameScene: SKScene, ObservableObject, SKPhysicsContactDelegate {
         ball.physicsBody?.contactTestBitMask = bitmasks.paddle.rawValue | bitmasks.frame.rawValue | bitmasks.brick.rawValue
         ball.physicsBody?.collisionBitMask = bitmasks.paddle.rawValue | bitmasks.frame.rawValue | bitmasks.brick.rawValue
         addChild(ball)
-        
+
         ball.physicsBody?.applyImpulse(CGVector(dx: 3, dy: 3))
-        
+
         // Frame
         let frame = SKPhysicsBody(edgeLoopFrom: self.frame)
         frame.friction = 0
@@ -77,44 +83,51 @@ class GameScene: SKScene, ObservableObject, SKPhysicsContactDelegate {
         frame.contactTestBitMask = bitmasks.ball.rawValue
         frame.collisionBitMask = bitmasks.ball.rawValue
         self.physicsBody = frame
-        
+
         // Bricks (Maximum per Row is 15 Bricks)
-        makeBricks(row: 15, bitmask: 0b100, y: 800, name: "bluebrick")
-        makeBricks(row: 15, bitmask: 0b100, y: 787, name: "redbrick")
-        makeBricks(row: 15, bitmask: 0b100, y: 774, name: "bluebrick")
-        makeBricks(row: 15, bitmask: 0b100, y: 761, name: "redbrick")
+//        makeBricks(row: 18, bitmask: 0b100, y: 800, name: "bluebrick")
+//        makeBricks(row: 15, bitmask: 0b100, y: 787, name: "redbrick")
+//        makeBricks(row: 15, bitmask: 0b100, y: 774, name: "bluebrick")
+//        makeBricks(row: 15, bitmask: 0b100, y: 761, name: "redbrick")
+
+        let lvlText = readTextFile(named: lvlList[gameState.currentLvl]).split(separator: "\n")
+        for line in lvlText.enumerated() {
+            for item in line.element.enumerated() {
+                makeBricks(brickType: String(item.element), row: item.offset, col: line.offset, brickCount: line.element.count)
+            }
+        }
     }
-    
+
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
         for touch in touches {
             let location = touch.location(in: self)
-            
+
             paddle.position.x = location.x
-            
+
             if isPaused == true {
                 ball.position.x = location.x
             }
         }
     }
-    
+
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         self.isPaused = false
     }
-    
+
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         self.isPaused = false
     }
-    
+
     override func update(_ currentTime: TimeInterval) {
         if paddle.position.x < 50 {
             paddle.position.x = 50
         }
-        
+
         if paddle.position.x > self.size.width - paddle.size.width / 2 {
             paddle.position.x = self.size.width - paddle.size.width / 2
         }
     }
-    
+
 //    func gameOver() {
 //        let gameOverLabel = SKLabelNode()
 //        gameOverLabel.text = "GameOver"
@@ -126,35 +139,73 @@ class GameScene: SKScene, ObservableObject, SKPhysicsContactDelegate {
 //        ball.removeFromParent()
 //        paddle.removeFromParent()
 //    }
-    
-    func makeBricks(row: Int, bitmask: UInt32, y: Int, name: String) {
-        let maxRow = 15
-        let padding = (maxRow - row) / 2
-        for i in 1...row {
-            let brick = SKSpriteNode(imageNamed: name)
-            brick.position = CGPoint(x: 7 + (i + padding) * Int(brick.size.width + 1), y: y)
-            brick.zPosition = 2
-            brick.name = "Brick" + String(i)
-            brick.physicsBody = SKPhysicsBody(rectangleOf: brick.size )
-            brick.physicsBody?.friction = 0
-            brick.physicsBody?.allowsRotation = false
-            brick.physicsBody?.restitution = 1
-            brick.physicsBody?.isDynamic = false
-            brick.physicsBody?.categoryBitMask = bitmasks.brick.rawValue
-            brick.physicsBody?.contactTestBitMask = bitmasks.ball.rawValue
-            brick.physicsBody?.collisionBitMask = bitmasks.ball.rawValue
-            addChild(brick)
+
+//    func makeBricks(row: Int, bitmask: UInt32, y: Int, name: String) {
+//        let maxRow = 15
+//        let padding = (maxRow - row) / 2
+//        print(padding)
+//        for i in 1...row {
+//            let brick = SKSpriteNode(imageNamed: name)
+//            brick.position = CGPoint(x: 7 + (i + padding) * Int(brick.size.width + 1), y: y)
+////            brick.position = CGPoint(x: 80, y: y)
+////            brick.position = CGPoint(x: 7 + Int(brick.size.width + 1) * i, y: y)
+//            brick.zPosition = 2
+//            brick.name = "Brick" + String(i)
+//            brick.physicsBody = SKPhysicsBody(rectangleOf: brick.size)
+//            brick.physicsBody?.friction = 0
+//            brick.physicsBody?.allowsRotation = false
+//            brick.physicsBody?.restitution = 1
+//            brick.physicsBody?.isDynamic = false
+//            brick.physicsBody?.categoryBitMask = bitmasks.brick.rawValue
+//            brick.physicsBody?.contactTestBitMask = bitmasks.ball.rawValue
+//            brick.physicsBody?.collisionBitMask = bitmasks.ball.rawValue
+//            addChild(brick)
+//        }
+//    }
+
+    func makeBricks(brickType: String, row: Int, col: Int, brickCount: Int) {
+        switch (brickType) {
+        case "b":
+            makeBrick(name: "bluebrick", row: row, col: col, brickCount: brickCount)
+        case "r":
+            makeBrick(name: "redbrick", row: row, col: col, brickCount: brickCount)
+        case "y":
+            makeBrick(name: "yellowbrick", row: row, col: col, brickCount: brickCount)
+//        case "x":
+//            print("space")
+        default:
+            print("IN ELSE")
         }
     }
-    
+
+    func makeBrick(name: String, row: Int, col: Int, brickCount: Int) {
+        let initCol = 800
+        let maxRow = 15
+//        let padding = (maxRow - brickCount) / 2
+        let brick = SKSpriteNode(imageNamed: name)
+        brick.size = CGSize(width: 25.25, height: 12)
+        brick.position = CGPoint(x: 15 + row * Int(brick.size.width + 1), y: initCol - (col * 13))
+        brick.zPosition = 2
+        brick.name = "Brick" + String(row)
+        brick.physicsBody = SKPhysicsBody(rectangleOf: brick.size)
+        brick.physicsBody?.friction = 0
+        brick.physicsBody?.allowsRotation = false
+        brick.physicsBody?.restitution = 1
+        brick.physicsBody?.isDynamic = false
+        brick.physicsBody?.categoryBitMask = bitmasks.brick.rawValue
+        brick.physicsBody?.contactTestBitMask = bitmasks.ball.rawValue
+        brick.physicsBody?.collisionBitMask = bitmasks.ball.rawValue
+        addChild(brick)
+    }
+
     func addScore() {
         score += 1
     }
-    
+
     func didBegin(_ contact: SKPhysicsContact) {
         let contactA: SKPhysicsBody
         let contactB: SKPhysicsBody
-        
+
         if contact.bodyA.categoryBitMask < contact.bodyB.categoryBitMask {
             contactA = contact.bodyA
             contactB = contact.bodyB // Ball
@@ -162,40 +213,44 @@ class GameScene: SKScene, ObservableObject, SKPhysicsContactDelegate {
             contactA = contact.bodyB
             contactB = contact.bodyA // Ball
         }
-        
+
         if contactA.categoryBitMask == bitmasks.brick.rawValue && contactB.categoryBitMask == bitmasks.ball.rawValue {
-            
             contactA.node?.removeFromParent() // contactA = Brick
             brickCounter += 1
             addScore()
-            
-            if brickCounter == 60 { // Normal 60
-                finishLevel()
+
+            if brickCounter == 1 { // Normal 60
+//                if on last level give a different finish Scene
+                if lvlList.last! == lvlList[gameState.currentLvl] {
+                    finishGame()
+                } else {
+                    finishLevel(lvlFinished: gameState.currentLvl)
+                    gameState.currentLvl = gameState.currentLvl + 1
+                }
             }
         }
-        
+
         if contactA.categoryBitMask == bitmasks.paddle.rawValue && contactB.categoryBitMask == bitmasks.ball.rawValue {
-            
             if contactB.node!.position.x <= contactA.node!.frame.midX - 5 {
                 contactB.node?.physicsBody?.velocity = CGVector(dx: 0, dy: 0)
                 contactB.node?.physicsBody?.applyImpulse(CGVector(dx: 3, dy: 3))
             }
-            
+
             if contactB.node!.position.x <= contactA.node!.frame.midX + 5 {
                 contactB.node?.physicsBody?.velocity = CGVector(dx: 0, dy: 0)
                 contactB.node?.physicsBody?.applyImpulse(CGVector(dx: -3, dy: 3))
             }
         }
-        
+
         if contactA.categoryBitMask == bitmasks.frame.rawValue && contactB.categoryBitMask == bitmasks.ball.rawValue {
-            
             let yPos = contact.contactPoint.y
             if yPos <= self.frame.minY + 10 {
+                gameState.currentLvl = 0
                 gameOver()
             }
         }
     }
-    
+
     func gameOver() {
         let gameOverLabel = SKLabelNode()
         gameOverLabel.fontName = "Helvetica"
@@ -204,17 +259,21 @@ class GameScene: SKScene, ObservableObject, SKPhysicsContactDelegate {
         gameOverLabel.zPosition = 3
         gameOverLabel.position = CGPoint(x: size.width / 2, y: size.height / 1.5)
         addChild(gameOverLabel)
-        
-        isGameOver = true
-        
+
+        gameState.isGameOver = true
+
         ball.removeFromParent()
         paddle.removeFromParent()
     }
-    
-    func finishLevel() {
-        
-        let finishScene = Finish001(size: self.size)
-        
+
+    func finishLevel(lvlFinished: Int) {
+        let finishScene = LvlFinishScene(lvlFinished: lvlFinished, gameState: gameState)
+        self.view?.presentScene(finishScene)
+    }
+
+    func finishGame() {
+        gameState.isGameWon = true
+        let finishScene = GameFinishScene(gameState: gameState)
         self.view?.presentScene(finishScene)
     }
 }
