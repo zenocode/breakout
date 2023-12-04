@@ -178,8 +178,7 @@ class GameScene: SKScene, ObservableObject, SKPhysicsContactDelegate {
             brickCounter += 1
             gameState.score += 10
 
-//            if brickCounter == totalBrickCount {
-            if brickCounter == 1 {
+            if brickCounter == totalBrickCount {
 //                if on last level give a different finish Scene
                 if lvlList.last! == lvlList[gameState.currentLvl] {
                     finishGame()
