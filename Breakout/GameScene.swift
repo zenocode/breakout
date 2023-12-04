@@ -14,12 +14,11 @@ class GameScene: SKScene, ObservableObject, SKPhysicsContactDelegate {
     let paddle = SKSpriteNode(imageNamed: "paddle")
     let ball = SKSpriteNode(imageNamed: "ball")
     var brickCounter = 0
-    @Published var score = 0
+    var totalBrickCount: Int = 0
 
-    init(gameState: GameState, brickCounter: Int = 0, score: Int = 0) {
+    init(gameState: GameState, brickCounter: Int = 0) {
         self.gameState = gameState
         self.brickCounter = brickCounter
-        self.score = score
         super.init(size: UIScreen.main.bounds.size)
     }
 
@@ -84,18 +83,13 @@ class GameScene: SKScene, ObservableObject, SKPhysicsContactDelegate {
         frame.collisionBitMask = bitmasks.ball.rawValue
         self.physicsBody = frame
 
-        // Bricks (Maximum per Row is 15 Bricks)
-//        makeBricks(row: 18, bitmask: 0b100, y: 800, name: "bluebrick")
-//        makeBricks(row: 15, bitmask: 0b100, y: 787, name: "redbrick")
-//        makeBricks(row: 15, bitmask: 0b100, y: 774, name: "bluebrick")
-//        makeBricks(row: 15, bitmask: 0b100, y: 761, name: "redbrick")
-
         let lvlText = readTextFile(named: lvlList[gameState.currentLvl]).split(separator: "\n")
         for line in lvlText.enumerated() {
             for item in line.element.enumerated() {
                 makeBricks(brickType: String(item.element), row: item.offset, col: line.offset, brickCount: line.element.count)
             }
         }
+        print(totalBrickCount)
     }
 
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -128,53 +122,22 @@ class GameScene: SKScene, ObservableObject, SKPhysicsContactDelegate {
         }
     }
 
-//    func gameOver() {
-//        let gameOverLabel = SKLabelNode()
-//        gameOverLabel.text = "GameOver"
-//        gameOverLabel.zPosition = 3
-//        gameOverLabel.position = CGPoint(x: size.width / 2, y: size.height / 2)
-//
-//        isGameOver = true
-//
-//        ball.removeFromParent()
-//        paddle.removeFromParent()
-//    }
-
-//    func makeBricks(row: Int, bitmask: UInt32, y: Int, name: String) {
-//        let maxRow = 15
-//        let padding = (maxRow - row) / 2
-//        print(padding)
-//        for i in 1...row {
-//            let brick = SKSpriteNode(imageNamed: name)
-//            brick.position = CGPoint(x: 7 + (i + padding) * Int(brick.size.width + 1), y: y)
-////            brick.position = CGPoint(x: 80, y: y)
-////            brick.position = CGPoint(x: 7 + Int(brick.size.width + 1) * i, y: y)
-//            brick.zPosition = 2
-//            brick.name = "Brick" + String(i)
-//            brick.physicsBody = SKPhysicsBody(rectangleOf: brick.size)
-//            brick.physicsBody?.friction = 0
-//            brick.physicsBody?.allowsRotation = false
-//            brick.physicsBody?.restitution = 1
-//            brick.physicsBody?.isDynamic = false
-//            brick.physicsBody?.categoryBitMask = bitmasks.brick.rawValue
-//            brick.physicsBody?.contactTestBitMask = bitmasks.ball.rawValue
-//            brick.physicsBody?.collisionBitMask = bitmasks.ball.rawValue
-//            addChild(brick)
-//        }
-//    }
-
     func makeBricks(brickType: String, row: Int, col: Int, brickCount: Int) {
         switch (brickType) {
         case "b":
             makeBrick(name: "bluebrick", row: row, col: col, brickCount: brickCount)
+            totalBrickCount += 1
         case "r":
             makeBrick(name: "redbrick", row: row, col: col, brickCount: brickCount)
+            totalBrickCount += 1
         case "y":
             makeBrick(name: "yellowbrick", row: row, col: col, brickCount: brickCount)
+            totalBrickCount += 1
+//            add other bricks here
 //        case "x":
 //            print("space")
         default:
-            print("IN ELSE")
+            break
         }
     }
 
@@ -198,10 +161,6 @@ class GameScene: SKScene, ObservableObject, SKPhysicsContactDelegate {
         addChild(brick)
     }
 
-    func addScore() {
-        score += 1
-    }
-
     func didBegin(_ contact: SKPhysicsContact) {
         let contactA: SKPhysicsBody
         let contactB: SKPhysicsBody
@@ -217,9 +176,10 @@ class GameScene: SKScene, ObservableObject, SKPhysicsContactDelegate {
         if contactA.categoryBitMask == bitmasks.brick.rawValue && contactB.categoryBitMask == bitmasks.ball.rawValue {
             contactA.node?.removeFromParent() // contactA = Brick
             brickCounter += 1
-            addScore()
+            gameState.score += 10
 
-            if brickCounter == 1 { // Normal 60
+//            if brickCounter == totalBrickCount {
+            if brickCounter == 1 {
 //                if on last level give a different finish Scene
                 if lvlList.last! == lvlList[gameState.currentLvl] {
                     finishGame()
@@ -259,9 +219,7 @@ class GameScene: SKScene, ObservableObject, SKPhysicsContactDelegate {
         gameOverLabel.zPosition = 3
         gameOverLabel.position = CGPoint(x: size.width / 2, y: size.height / 1.5)
         addChild(gameOverLabel)
-
         gameState.isGameOver = true
-
         ball.removeFromParent()
         paddle.removeFromParent()
     }

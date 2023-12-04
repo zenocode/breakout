@@ -9,6 +9,7 @@ import Foundation
 import SpriteKit
 import SwiftUI
 
+// Used to display a level finsh and on tap go the next level
 class LvlFinishScene: SKScene {
     let lvlFinished: Int
     let gameState: GameState
@@ -40,6 +41,7 @@ class LvlFinishScene: SKScene {
     }
 }
 
+// Used to display game finish when all level have been completed
 class GameFinishScene: SKScene {
     let gameState: GameState
 
@@ -64,8 +66,5 @@ class GameFinishScene: SKScene {
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        // Assuming you have a reference to the current window
-//        gameState.navigationPath = NavigationPath()
-//        print("HERE")
     }
 }

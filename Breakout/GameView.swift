@@ -9,8 +9,6 @@ import SwiftUI
 import SpriteKit
 
 struct GameView: View {
-    //    @StateObject private var game = GameScene(gameState: gameState)
-    //    @StateObject private var lv2 = Level002()
     @State var gameState: GameState
     @StateObject var game: GameScene
 
@@ -19,7 +17,6 @@ struct GameView: View {
             ZStack(alignment: .top) {
                 HStack {
                     SpriteView(scene: game)
-                    //SpriteView(scene: game, debugOptions: [.showsPhysics])
                     .ignoresSafeArea()
                 }
                     .navigationBarHidden(true)
@@ -49,7 +46,7 @@ struct GameView: View {
                     }
                 }
                 VStack(alignment: .trailing) {
-                    Text("Score: \(game.score)")
+                    Text("Score: \(gameState.score)")
                         .padding(.top, 60)
                         .foregroundColor(.white)
                 }

@@ -10,7 +10,8 @@ import SwiftUI
 
 @Observable
 class GameState {
-    var currentLvl = 0
+    var currentLvl: Int = 0
+    var score: Int = 0
     var isGameWon: Bool = false
     var isGameOver: Bool = false
     var navigationPath = NavigationPath()
