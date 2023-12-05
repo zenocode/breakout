@@ -15,28 +15,12 @@ struct GameView: View {
     var body: some View {
         GeometryReader { geo in
             ZStack(alignment: .top) {
-                HStack {
-                    SpriteView(scene: game)
-                    .ignoresSafeArea()
-                }
-                    .navigationBarHidden(true)
+                SpriteView(scene: game)
+                .navigationBarHidden(true)
                     .navigationBarBackButtonHidden(true)
                     .ignoresSafeArea()
                     .statusBar(hidden: true)
-                    .onChange(of: gameState.isGameWon) { oldValue, newValue in
-                    print("NAVIGATION")
-                    gameState.navigationPath = NavigationPath()
-                }
-                if gameState.isGameOver {
-                    VStack {
-                        Spacer()
-                        NavigationLink(destination: ContentView(), label: {
-                                Text("Main Menu")
-                            })
-                        Spacer()
-                    }
-                }
-                if gameState.isGameWon {
+                if gameState.isGameOver || gameState.isGameWon {
                     VStack {
                         Spacer()
                         NavigationLink(destination: ContentView(), label: {
