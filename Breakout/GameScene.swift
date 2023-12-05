@@ -34,6 +34,7 @@ class GameScene: SKScene, ObservableObject, SKPhysicsContactDelegate {
     }
 
     override func didMove(to view: SKView) {
+//        MARK: - IN DID MOVE
         backgroundColor = .black
         // view.showsPhysics = true
 
@@ -89,7 +90,6 @@ class GameScene: SKScene, ObservableObject, SKPhysicsContactDelegate {
                 makeBricks(brickType: String(item.element), row: item.offset, col: line.offset, brickCount: line.element.count)
             }
         }
-        print(totalBrickCount)
     }
 
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -141,11 +141,15 @@ class GameScene: SKScene, ObservableObject, SKPhysicsContactDelegate {
         }
     }
 
+//    MARK: - MAKE BRICK
     func makeBrick(name: String, row: Int, col: Int, brickCount: Int) {
-        let initCol = 800
         let brick = SKSpriteNode(imageNamed: name)
-        brick.size = CGSize(width: 50, height: 24)
-        brick.position = CGPoint(x: 15 + row * Int(brick.size.width + 1), y: initCol - (col * 25))
+        let brickWidth: Double = (UIScreen.main.bounds.size.width - (MAX_BRICK_ROW_COUNT - 1)) / MAX_BRICK_ROW_COUNT
+        let totalBricksRowWidth: Double = (round(brickWidth) * Double(brickCount)) + Double(brickCount - 1)
+        let padding = (UIScreen.main.bounds.size.width - totalBricksRowWidth) / 2
+        brick.size = CGSize(width: Int(round(brickWidth)), height: BRICK_HEIGHT)
+        brick.anchorPoint = CGPoint(x: 0, y: 0)
+        brick.position = CGPoint(x: Int(padding) + row * (Int(brick.size.width) + 1), y: INIT_COL_POS - (col * Int(brick.size.height + 1)))
         brick.zPosition = 2
         brick.name = "Brick" + String(row)
         brick.physicsBody = SKPhysicsBody(rectangleOf: brick.size)
