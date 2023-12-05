@@ -1,7 +1,4 @@
 x
 x
 x
-bbbbbbbbbbbbbbb
-rrrrrrrrrrrrrrr
-bbbbbbbbbbbbbbb
-rrrrrrrrrrrrrrr
+xbbbbbbbx

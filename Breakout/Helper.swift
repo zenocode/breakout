@@ -23,6 +23,7 @@ enum Brick: String {
     case b = "bluebrick"
     case r = "redbrick"
     case y = "yellowbrick"
+    case g = "greenbrick"
     case x = "space"
 }
 

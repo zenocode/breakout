@@ -25,7 +25,7 @@ class LvlFinishScene: SKScene {
     }
 
     override func didMove(to view: SKView) {
-        backgroundColor = .gray
+        backgroundColor = .black
 
         let label = SKLabelNode(fontNamed: "Helvetica")
         label.text = "Level \(lvlFinished + 1) Cleared"

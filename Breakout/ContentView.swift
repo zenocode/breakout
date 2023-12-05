@@ -20,7 +20,8 @@ struct ContentView: View {
                 Image("menu_bg")
                     .resizable()
                     .scaledToFill()
-                    .edgesIgnoringSafeArea(.all)
+                    .frame(minWidth: 0, maxHeight: .infinity)
+                    .ignoresSafeArea(.all)
                 VStack {
                     Spacer()
                     NavigationLink(destination: GameView(gameState: gameState, game: GameScene(gameState: gameState)), label: {

@@ -51,8 +51,8 @@ struct GameView: View {
                         .foregroundColor(.white)
                 }
             }
-                .frame(width: geo.size.width, alignment: .center)
-                .ignoresSafeArea()
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .ignoresSafeArea(.all)
         }
     }
 }

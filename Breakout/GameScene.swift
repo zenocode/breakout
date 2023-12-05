@@ -34,8 +34,8 @@ class GameScene: SKScene, ObservableObject, SKPhysicsContactDelegate {
     }
 
     override func didMove(to view: SKView) {
-        backgroundColor = .darkGray
-        view.showsPhysics = true
+        backgroundColor = .black
+        // view.showsPhysics = true
 
         scene?.size = view.bounds.size
         scene?.scaleMode = .aspectFill
@@ -46,7 +46,7 @@ class GameScene: SKScene, ObservableObject, SKPhysicsContactDelegate {
         self.isPaused = true
 
         // Paddle
-        paddle.position = CGPoint(x: size.width / 2, y: 75)
+        paddle.position = CGPoint(x: size.width / 2, y: 150)
         paddle.zPosition = 2
         paddle.physicsBody = SKPhysicsBody(texture: paddle.texture!, size: paddle.texture!.size())
         paddle.physicsBody?.friction = 0
@@ -133,9 +133,9 @@ class GameScene: SKScene, ObservableObject, SKPhysicsContactDelegate {
         case "y":
             makeBrick(name: "yellowbrick", row: row, col: col, brickCount: brickCount)
             totalBrickCount += 1
-//            add other bricks here
-//        case "x":
-//            print("space")
+        case "g":
+            makeBrick(name: "greenbrick", row: row, col: col, brickCount: brickCount)
+            totalBrickCount += 1
         default:
             break
         }
@@ -143,11 +143,9 @@ class GameScene: SKScene, ObservableObject, SKPhysicsContactDelegate {
 
     func makeBrick(name: String, row: Int, col: Int, brickCount: Int) {
         let initCol = 800
-        let maxRow = 15
-//        let padding = (maxRow - brickCount) / 2
         let brick = SKSpriteNode(imageNamed: name)
-        brick.size = CGSize(width: 25.25, height: 12)
-        brick.position = CGPoint(x: 15 + row * Int(brick.size.width + 1), y: initCol - (col * 13))
+        brick.size = CGSize(width: 50, height: 24)
+        brick.position = CGPoint(x: 15 + row * Int(brick.size.width + 1), y: initCol - (col * 25))
         brick.zPosition = 2
         brick.name = "Brick" + String(row)
         brick.physicsBody = SKPhysicsBody(rectangleOf: brick.size)
